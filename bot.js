@@ -37,18 +37,35 @@ const client = new Client({
 });
 
 // Функция регистрации команд
-async function registerCommands() {
-  const rest = new REST({ version: "10" }).setToken(process.env.TOKEN);
+async function startBot() {
+  // Проверка наличия необходимых переменных окружения
+  if (!process.env.TOKEN) {
+    console.error("❌ Токен бота не найден в .env файле");
+    process.exit(1);
+  }
   
+  if (!process.env.CLIENT_ID) {
+    console.error("❌ CLIENT_ID не найден в .env файле");
+    process.exit(1);
+  }
+  
+  if (!process.env.CHANNEL_ID) {
+    console.error("❌ CHANNEL_ID не найден в .env файле");
+    process.exit(1);
+  }
+
+  console.log("🔑 Проверка переменных окружения...");
+  console.log("TOKEN:", process.env.TOKEN ? "✅ Установлен" : "❌ Отсутствует");
+  console.log("CLIENT_ID:", process.env.CLIENT_ID ? "✅ Установлен" : "❌ Отсутствует");
+  console.log("CHANNEL_ID:", process.env.CHANNEL_ID ? "✅ Установлен" : "❌ Отсутствует");
+
   try {
-    console.log("📡 Регистрирую команды...");
-    await rest.put(
-      Routes.applicationCommands(process.env.CLIENT_ID),
-      { body: commands }
-    );
-    console.log("✅ Команды зарегистрированы!");
+    await registerCommands();
+    console.log("🤖 Запускаю бота...");
+    await client.login(process.env.TOKEN);
   } catch (error) {
-    console.error("❌ Ошибка регистрации команд:", error);
+    console.error("❌ Критическая ошибка при запуске:", error.message);
+    process.exit(1);
   }
 }
 
